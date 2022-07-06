@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model comments {
+  id        Int       @id @default(autoincrement())
+  message   String    @db.VarChar(255)
+  user_id   Int
+  post_id   Int
+  createdAt DateTime  @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @db.DateTime(0)
+  posts     posts     @relation(fields: [post_id], references: [id], onDelete: Cascade, map: "comments_ibfk2")
+  users     users     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "comments_ibfk1")
+
+  @@index([user_id], map: "comments_ibfk1")
+  @@index([post_id], map: "comments_ibfk2")
+}
+
+model likes {
+  id        Int      @id @default(autoincrement())
+  user_id   Int
+  post_id   Int
+  createdAt DateTime @default(now()) @db.DateTime(0)
+  posts     posts    @relation(fields: [post_id], references: [id], onDelete: Cascade, map: "likes_ibfk2")
+  users     users    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "likes_ibfk1")
+
+  @@index([user_id], map: "likes_ibfk1")
+  @@index([post_id], map: "likes_ibfk2")
+}
+
+model posts {
+  id        Int        @id @default(autoincrement())
+  message   String     @db.VarChar(255)
+  imageUrl  String?    @db.VarChar(255)
+  user_id   Int
+  createdAt DateTime   @default(now()) @db.DateTime(0)
+  updatedAt DateTime?  @db.DateTime(0)
+  users     users      @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "posts_ibfk1")
+  comments  comments[]
+  likes     likes[]
+
+  @@index([user_id], map: "posts_ibfk1")
+}
+
+model roles {
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(255)
+  users_roles users_roles[]
+}
+
+model users {
+  id          Int           @id @default(autoincrement())
+  firstName   String        @db.VarChar(40)
+  lastName    String        @db.VarChar(40)
+  email       String        @unique(map: "email") @db.VarChar(255)
+  password    String        @db.VarChar(255)
+  avatarUrl   String?       @db.VarChar(255)
+  createdAt   DateTime      @default(now()) @db.DateTime(0)
+  updatedAt   DateTime?     @db.DateTime(0)
+  comments    comments[]
+  likes       likes[]
+  posts       posts[]
+  users_roles users_roles[]
+}
+
+model users_roles {
+  user_id Int
+  role_id Int   @default(2)
+  roles   roles @relation(fields: [role_id], references: [id], onDelete: Cascade, map: "users_roles_ibfk2")
+  users   users @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "users_roles_ibfk1")
+
+  @@id([user_id, role_id])
+  @@index([user_id], map: "users_roles_ibfk1")
+  @@index([role_id], map: "users_roles_ibfk2")
+}
