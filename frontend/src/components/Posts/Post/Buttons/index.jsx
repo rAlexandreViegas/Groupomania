@@ -17,6 +17,7 @@ function Buttons({
   setEditPost,
 }) {
   const userId = JSON.parse(localStorage.getItem("userId"));
+  const roleId = JSON.parse(localStorage.getItem("roleId"));
 
   const handleLike = (postId) => {
     likePost(postId, userId, getAllPosts, setDataPosts, setDisplayPage);
@@ -41,14 +42,14 @@ function Buttons({
 
         <div>
           {/* Edit button */}
-          {editPost ? null : post.user_id === userId || userId === 1 ? (
+          {editPost ? null : post.user_id === userId || roleId === 1 ? (
             <button onClick={(e) => setEditPost(true)}>
               <FontAwesomeIcon icon={faPenToSquare} />
             </button>
           ) : null}
 
           {/* Delete button */}
-          {post.user_id === userId || userId === 1 ? (
+          {post.user_id === userId || roleId === 1 ? (
             <button onClick={() => handleDelete(post.id)}>
               <FontAwesomeIcon icon={faTrash} />
             </button>

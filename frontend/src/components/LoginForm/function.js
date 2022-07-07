@@ -21,6 +21,7 @@ async function sendLoginData(userEmail, userPassword, navigate, setFormErrors) {
     const data = await resultApi.json();
     if (!data.email && !data.password) {
       localStorage.setItem("userId", JSON.stringify(data.userId));
+      localStorage.setItem("roleId", JSON.stringify(data.roleId));
       navigate("/feed");
     } else {
       setFormErrors(data);

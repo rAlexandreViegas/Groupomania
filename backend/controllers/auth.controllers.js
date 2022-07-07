@@ -39,6 +39,7 @@ exports.login = async (req, res, next) => {
   try {
     const user = await prisma.users.findUnique({
       where: { email: req.body.email },
+      include: { users_roles: true },
     });
     // Check if the email exist, if yes, return an error
     if (user === null) {
@@ -53,9 +54,11 @@ exports.login = async (req, res, next) => {
           expiresIn: process.env.JWT_EXPIRES_IN,
         });
         res.cookie("Token", token, { httpOnly: true });
-        res
-          .status(200)
-          .json({ userId: user.id, message: "Connexion réussie !" });
+        res.status(200).json({
+          userId: user.id,
+          roleId: user.users_roles[0].role_id,
+          message: "Connexion réussie !",
+        });
       }
     }
   } catch (error) {

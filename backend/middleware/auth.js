@@ -39,7 +39,15 @@ exports.auth = (route) => {
       const data = await request.findUnique({
         where: { id: Number(req.params.id) },
       });
-      if (userId === 1 || userId === data.id || userId === data.user_id) {
+      const isAdmin = await prisma.users.findUnique({
+        where: { id: userId },
+        include: { users_roles: true },
+      });
+      if (
+        isAdmin.users_roles[0].role_id === 1 ||
+        userId === data.id ||
+        userId === data.user_id
+      ) {
         next();
       } else {
         res.status(403).json({ error: "Utilisateur non autorisé" });

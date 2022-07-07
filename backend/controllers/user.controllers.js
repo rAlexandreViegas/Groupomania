@@ -8,6 +8,7 @@ exports.getUser = async (req, res, next) => {
   try {
     const user = await prisma.users.findUnique({
       where: { id: Number(req.params.id) },
+      include: { users_roles: true },
     });
     res.status(200).json({ user, message: "L'utilisateur a été récupéré !" });
   } catch (error) {
@@ -69,4 +70,3 @@ exports.deleteUser = async (req, res, next) => {
     res.status(500).json({ error });
   }
 };
-
