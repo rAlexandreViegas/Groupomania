@@ -1,50 +1,40 @@
 const { PrismaClient } = require("@prisma/client");
 
+const handleError = require("../modules/errors");
+
 const prisma = new PrismaClient();
 
 // Create a comment
-exports.createComment = async (req, res, next) => {
-  try {
-    const comment = await prisma.comments.create({
-      data: {
-        message: req.body.message,
-        user_id: Number(req.body.user_id),
-        post_id: Number(req.body.post_id),
-      },
-      include: { users: true },
-    });
-    res.status(200).json({ comment, message: "Le commentaire a été créé !" });
-  } catch (error) {
-    res.status(500).json({ error });
-  }
-};
+const createComment = async (req, res, next) => {
+    try {
+        const newComment = await prisma.comments.create({
+            data: {
+                message: req.body.message,
+                user_id: Number(req.body.user_id),
+                post_id: Number(req.body.post_id),
+            },
+        });
 
-// Update a comment
-exports.updateComment = async (req, res, next) => {
-  try {
-    const comment = await prisma.comments.update({
-      where: { id: Number(req.params.id) },
-      data: { message: req.body.message },
-      include: { users: true },
-    });
-    res
-      .status(200)
-      .json({ comment, message: "Le commentaire a été modifié !" });
-  } catch (error) {
-    res.status(500).json({ error });
-  }
+        res.status(201).json({ newComment, message: "Comment created!" });
+    } catch (error) {
+        handleError(res, error);
+    }
 };
 
 // Delete a comment
-exports.deleteComment = async (req, res, next) => {
-  try {
-    const comment = await prisma.comments.delete({
-      where: { id: Number(req.params.id) },
-    });
-    res
-      .status(200)
-      .json({ comment, message: "Le commentaire a été surprimé !" });
-  } catch (error) {
-    res.status(500).json({ error });
-  }
+const deleteComment = async (req, res, next) => {
+    try {
+        await prisma.comments.delete({
+            where: { id: Number(req.params.id) },
+        });
+
+        res.status(204).json();
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
+module.exports = {
+    createComment,
+    deleteComment,
 };
