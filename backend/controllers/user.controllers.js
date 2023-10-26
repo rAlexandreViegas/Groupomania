@@ -1,72 +1,85 @@
 const { PrismaClient } = require("@prisma/client");
-const fs = require("fs");
+
+const handleError = require("../modules/errors");
+const deleteImage = require("../modules/delete.image");
 
 const prisma = new PrismaClient();
 
+// Define the selected fields for user data
+const userSelect = {
+    firstName: true,
+    lastName: true,
+    avatarUrl: true,
+};
+
 // Get a user
-exports.getUser = async (req, res, next) => {
-  try {
-    const user = await prisma.users.findUnique({
-      where: { id: Number(req.params.id) },
-      include: { users_roles: true },
-    });
-    res.status(200).json({ user, message: "L'utilisateur a été récupéré !" });
-  } catch (error) {
-    res.status(500).json({ error });
-  }
+const getUser = async (req, res) => {
+    try {
+        const user = await prisma.users.findUnique({
+            where: { id: Number(req.params.id) },
+            select: {
+                ...userSelect,
+                email: true,
+                users_roles: true,
+            },
+        });
+
+        res.status(200).json({ user, message: "User has been retrieved!" });
+    } catch (error) {
+        handleError(res, error);
+    }
 };
 
 // Update a user
-exports.updateUser = async (req, res, next) => {
-  try {
-    // Check if the request have an image, if yes
-    if (req.file !== undefined) {
-      const user = await prisma.users.findUnique({
-        where: { id: Number(req.params.id) },
-      });
-      // Check if the user already have an avatar, if yes, delete it from the server
-      if (user.avatarUrl !== null) {
-        const filename = user.avatarUrl.split("/images/")[1];
-        fs.unlinkSync(`images/${filename}`);
-      }
-      // Update the user's avatar with the new one
-      await prisma.users.update({
-        where: { id: user.id },
-        data: { avatarUrl: `/images/avatars/${req.file.filename}` },
-      });
+const updateUser = async (req, res) => {
+    try {
+        const user = await prisma.users.findUnique({
+            where: { id: Number(req.params.id) },
+        });
+
+        // Delete the previous avatar associated with the user if a new image is uploaded
+        req.file !== undefined ? deleteImage(user.avatarUrl) : null;
+
+        const updatedUser = await prisma.users.update({
+            where: { id: Number(req.params.id) },
+            select: userSelect,
+            data: {
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                // Set 'avatarUrl' to the new file path if a file is uploaded
+                avatarUrl: req.file ? `/images/avatars/${req.file.filename}` : undefined,
+            },
+        });
+
+        res.status(200).json({ updatedUser, message: "User has been updated!" });
+    } catch (error) {
+        handleError(res, error);
     }
-    // Update the user fisrtname and lastname
-    const user = await prisma.users.update({
-      where: { id: Number(req.params.id) },
-      data: {
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-      },
-    });
-    res.status(200).json({ user, message: "L'utilisateur a été modifié !" });
-  } catch (error) {
-    res.status(500).json({ error });
-  }
 };
 
 // Delete a user
-exports.deleteUser = async (req, res, next) => {
-  try {
-    const user = await prisma.users.findUnique({
-      where: { id: Number(req.params.id) },
-    });
-    // Check if the user have an avatar, if yes, delete it from the server
-    if (user.avatarUrl !== null) {
-      const filename = user.avatarUrl.split("/images/")[1];
-      fs.unlinkSync(`images/${filename}`);
+const deleteUser = async (req, res) => {
+    try {
+        const user = await prisma.users.findUnique({
+            where: { id: Number(req.params.id) },
+        });
+
+        // Delete the avatar if the user has one.
+        user.avatarUrl !== null ? deleteImage(user.avatarUrl) : null;
+
+        await prisma.users.delete({
+            where: { id: user.id },
+        });
+
+        res.clearCookie("Token");
+        res.status(204).json();
+    } catch (error) {
+        handleError(res, error);
     }
-    // Delete the user
-    await prisma.users.delete({
-      where: { id: user.id },
-    });
-    res.clearCookie("Token");
-    res.status(200).json({ user, message: "L'utilisateur a été surprimé !" });
-  } catch (error) {
-    res.status(500).json({ error });
-  }
+};
+
+module.exports = {
+    getUser,
+    updateUser,
+    deleteUser,
 };
