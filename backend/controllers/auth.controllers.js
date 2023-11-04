@@ -2,7 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const handleError = require("../modules/errors");
+const handleError = require("../modules/handle.error");
 
 const prisma = new PrismaClient();
 
@@ -67,13 +67,11 @@ const login = async (req, res) => {
     });
 
     res.cookie("Token", token, { httpOnly: true });
-    res
-      .status(200)
-      .json({
-        userId: user.id,
-        roleId: user.users_roles[0].role_id,
-        message: "Login successful!",
-      });
+    res.status(200).json({
+      userId: user.id,
+      roleId: user.users_roles[0].role_id,
+      message: "Login successful!",
+    });
   } catch (error) {
     handleError(res, error);
   }

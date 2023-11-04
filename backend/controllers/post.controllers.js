@@ -1,6 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 
-const handleError = require("../modules/errors");
+const handleError = require("../modules/handle.error");
 const deleteImage = require("../modules/delete.image");
 
 const prisma = new PrismaClient();
