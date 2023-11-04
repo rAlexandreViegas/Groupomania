@@ -7,133 +7,132 @@ const prisma = new PrismaClient();
 
 // Define the selected fields for user data
 const userSelect = {
-    lastName: true,
-    firstName: true,
-    avatarUrl: true,
+  firstName: true,
+  lastName: true,
+  avatarUrl: true,
 };
 
 // Get all posts
 const getAllPosts = async (req, res) => {
-    try {
-        const posts = await prisma.posts.findMany({
-            include: {
-                users: {
-                    select: userSelect,
-                },
-                comments: {
-                    include: {
-                        users: {
-                            select: userSelect,
-                        },
-                    },
-                },
-                likes: true,
+  try {
+    const posts = await prisma.posts.findMany({
+      include: {
+        users: {
+          select: userSelect,
+        },
+        comments: {
+          include: {
+            users: {
+              select: userSelect,
             },
-            orderBy: { createdAt: "desc" },
-        });
+          },
+        },
+        likes: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
 
-        res.status(200).json({ posts, message: "All posts retrieved!" });
-    } catch (error) {
-        handleError(res, error);
-    }
+    res.status(200).json({ posts, message: "All posts retrieved!" });
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 // Create a post
 const createPost = async (req, res) => {
-    try {
-        const newPost = await prisma.posts.create({
-            data: {
-                message: req.body.message,
-                // Set 'imageUrl' to the file path if a file is uploaded
-                imageUrl: req.file ? `/images/posts/${req.file.filename}` : null,
-                user_id: Number(req.body.user_id),
-            },
-        });
+  try {
+    const newPost = await prisma.posts.create({
+      data: {
+        message: req.body.message,
+        // Set 'imageUrl' to the file path if a file is uploaded
+        imageUrl: req.file ? `/images/posts/${req.file.filename}` : null,
+        user_id: Number(req.body.user_id),
+      },
+    });
 
-        res.status(201).json({ newPost, message: "Post created!" });
-    } catch (error) {
-        handleError(res, error);
-    }
+    res.status(201).json({ newPost, message: "Post created!" });
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 // Update a post
 const updatePost = async (req, res) => {
-    try {
-        const post = await prisma.posts.findUnique({
-            where: { id: Number(req.params.id) },
-        });
+  try {
+    const post = await prisma.posts.findUnique({
+      where: { id: Number(req.params.id) },
+    });
 
-        // Delete the previous image associated with the post if a new image is uploaded
-        req.file !== undefined ? deleteImage(post.imageUrl) : null;
+    // Delete the previous image associated with the post if a new image is uploaded
+    req.file ? deleteImage(post.imageUrl) : null;
 
-        const updatedPost = await prisma.posts.update({
-            where: { id: Number(req.params.id) },
-            data: {
-                message: req.body.message,
-                // Set 'imageUrl' to the new file path if a file is uploaded
-                imageUrl: req.file ? `/images/posts/${req.file.filename}` : undefined,
-            },
-        });
+    const updatedPost = await prisma.posts.update({
+      where: { id: Number(req.params.id) },
+      data: {
+        message: req.body.message,
+        // Set 'imageUrl' to the new file path if a file is uploaded
+        imageUrl: req.file ? `/images/posts/${req.file.filename}` : undefined,
+      },
+    });
 
-        res.status(200).json({ updatedPost, message: "Post updated!" });
-    } catch (error) {
-        handleError(res, error);
-    }
+    res.status(200).json({ updatedPost, message: "Post updated!" });
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 // Delete a post
 const deletePost = async (req, res) => {
-    try {
-        const post = await prisma.posts.findUnique({
-            where: { id: Number(req.params.id) },
-        });
+  try {
+    const post = await prisma.posts.findUnique({
+      where: { id: Number(req.params.id) },
+    });
 
-        // Delete the image if there is one in the post.
-        post.imageUrl !== null ? deleteImage(post.imageUrl) : null;
+    // Delete the image if there is one in the post.
+    post.imageUrl ? deleteImage(post.imageUrl) : null;
 
-        await prisma.posts.delete({
-            where: { id: post.id },
-        });
+    await prisma.posts.delete({
+      where: { id: post.id },
+    });
 
-        res.status(204).json();
-    } catch (error) {
-        handleError(res, error);
-    }
+    res.status(204).json();
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 // Like a post
 const likePost = async (req, res) => {
-    const { user_id, post_id } = req.body;
-    const likeData = { user_id, post_id };
+  const likeData = ({ user_id, post_id } = req.body);
 
-    try {
-        const existingLike = await prisma.likes.findFirst({
-            where: likeData,
-        });
+  try {
+    const existingLike = await prisma.likes.findFirst({
+      where: likeData,
+    });
 
-        // Check if the user has already liked the post
-        if (existingLike !== null) {
-            await prisma.likes.deleteMany({
-                where: likeData,
-            });
+    // Check if the user has already liked the post
+    if (existingLike) {
+      await prisma.likes.deleteMany({
+        where: likeData,
+      });
 
-            res.status(204).json();
-        } else {
-            const newLike = await prisma.likes.create({
-                data: likeData,
-            });
+      res.status(204).json();
+    } else {
+      const newLike = await prisma.likes.create({
+        data: likeData,
+      });
 
-            res.status(201).json({ newLike, message: "Post liked!" });
-        }
-    } catch (error) {
-        handleError(res, error);
+      res.status(201).json({ newLike, message: "Post liked!" });
     }
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 module.exports = {
-    getAllPosts,
-    createPost,
-    updatePost,
-    deletePost,
-    likePost,
+  getAllPosts,
+  createPost,
+  updatePost,
+  deletePost,
+  likePost,
 };
