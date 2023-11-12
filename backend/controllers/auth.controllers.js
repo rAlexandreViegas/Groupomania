@@ -7,7 +7,7 @@ const handleError = require("../modules/handle.error");
 const prisma = new PrismaClient();
 
 // Sign up
-const signUp = async (req, res) => {
+async function signUp(req, res) {
   try {
     const existingUser = await prisma.users.findUnique({
       where: { email: req.body.email },
@@ -37,10 +37,10 @@ const signUp = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-};
+}
 
 // Login
-const login = async (req, res) => {
+async function login(req, res) {
   try {
     const user = await prisma.users.findUnique({
       where: { email: req.body.email },
@@ -75,13 +75,13 @@ const login = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-};
+}
 
 // Logout
-const logout = (req, res) => {
+async function logout(req, res) {
   res.clearCookie("Token");
   res.status(204).json();
-};
+}
 
 module.exports = {
   signUp,

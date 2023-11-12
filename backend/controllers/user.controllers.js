@@ -12,8 +12,8 @@ const userSelect = {
   avatarUrl: true,
 };
 
-// Get a user
-const getUser = async (req, res) => {
+// Fetch a user
+async function fetchUser(req, res) {
   try {
     const user = await prisma.users.findUnique({
       where: { id: Number(req.params.id) },
@@ -28,10 +28,10 @@ const getUser = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-};
+}
 
 // Update a user
-const updateUser = async (req, res) => {
+async function updateUser(req, res) {
   try {
     const user = await prisma.users.findUnique({
       where: { id: Number(req.params.id) },
@@ -57,10 +57,10 @@ const updateUser = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-};
+}
 
 // Delete a user
-const deleteUser = async (req, res) => {
+async function deleteUser(req, res) {
   try {
     const user = await prisma.users.findUnique({
       where: { id: Number(req.params.id) },
@@ -78,10 +78,10 @@ const deleteUser = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-};
+}
 
 module.exports = {
-  getUser,
+  fetchUser,
   updateUser,
   deleteUser,
 };

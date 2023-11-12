@@ -5,7 +5,7 @@ const handleError = require("../modules/handle.error");
 const prisma = new PrismaClient();
 
 // Create a comment
-const createComment = async (req, res) => {
+async function createComment(req, res) {
   try {
     const newComment = await prisma.comments.create({
       data: {
@@ -19,10 +19,10 @@ const createComment = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-};
+}
 
 // Delete a comment
-const deleteComment = async (req, res) => {
+async function deleteComment(req, res) {
   try {
     await prisma.comments.delete({
       where: { id: Number(req.params.id) },
@@ -32,7 +32,7 @@ const deleteComment = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-};
+}
 
 module.exports = {
   createComment,

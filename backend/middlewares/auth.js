@@ -6,16 +6,16 @@ const handleError = require("../modules/handle.error");
 const prisma = new PrismaClient();
 
 // Check if the user is connected to the website
-const checkUserAuthentication = (req, res, next) => {
+function userAuthentication(req, res, next) {
   !req.cookies.Token
     ? res.status(403).json({
         error: "To use the social network, please log in.",
       })
     : next();
-};
+}
 
 // Check if the user is authorized to manage data
-const checkUserAuthorization = (route) => {
+function userAuthorization(route) {
   return async (req, res, next) => {
     try {
       let request = null;
@@ -56,9 +56,9 @@ const checkUserAuthorization = (route) => {
       handleError(res, error);
     }
   };
-};
+}
 
 module.exports = {
-  checkUserAuthentication,
-  checkUserAuthorization,
+  userAuthentication,
+  userAuthorization,
 };

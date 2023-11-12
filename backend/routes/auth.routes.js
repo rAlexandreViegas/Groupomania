@@ -1,13 +1,13 @@
 const express = require("express");
 
-const { validateSignUp } = require("../middlewares/validator");
-const { signUp, login, logout } = require("../controllers/auth.controllers");
+const VALIDATE = require("../middlewares/validator");
+const AUTH = require("../controllers/auth.controllers");
 
 const router = express.Router();
 
-// Auth
-router.post("/signup", validateSignUp, signUp);
-router.post("/login", login);
-router.delete("/logout", logout);
+// Sign up, login, logout
+router.post("/signup", VALIDATE.signUp, AUTH.signUp);
+router.post("/login", AUTH.login);
+router.delete("/logout", AUTH.logout);
 
 module.exports = router;

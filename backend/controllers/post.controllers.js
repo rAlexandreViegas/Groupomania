@@ -12,8 +12,8 @@ const userSelect = {
   avatarUrl: true,
 };
 
-// Get all posts
-const getAllPosts = async (req, res) => {
+// Fetch all posts
+async function fetchPosts(req, res) {
   try {
     const posts = await prisma.posts.findMany({
       include: {
@@ -36,10 +36,10 @@ const getAllPosts = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-};
+}
 
 // Create a post
-const createPost = async (req, res) => {
+async function createPost(req, res) {
   try {
     const newPost = await prisma.posts.create({
       data: {
@@ -54,10 +54,10 @@ const createPost = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-};
+}
 
 // Update a post
-const updatePost = async (req, res) => {
+async function updatePost(req, res) {
   try {
     const post = await prisma.posts.findUnique({
       where: { id: Number(req.params.id) },
@@ -79,10 +79,10 @@ const updatePost = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-};
+}
 
 // Delete a post
-const deletePost = async (req, res) => {
+async function deletePost(req, res) {
   try {
     const post = await prisma.posts.findUnique({
       where: { id: Number(req.params.id) },
@@ -99,10 +99,10 @@ const deletePost = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-};
+}
 
 // Like a post
-const likePost = async (req, res) => {
+async function likePost(req, res) {
   const likeData = ({ user_id, post_id } = req.body);
 
   try {
@@ -127,10 +127,10 @@ const likePost = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-};
+}
 
 module.exports = {
-  getAllPosts,
+  fetchPosts,
   createPost,
   updatePost,
   deletePost,
