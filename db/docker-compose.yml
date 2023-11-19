@@ -1,9 +1,9 @@
-version: "3.9"
+version: "3.8"
 
 services:
 
   mariadb:
-    image: mariadb:10.8.3
+    image: mariadb:latest
     container_name: mariadb
     restart: always
     environment:
@@ -11,10 +11,11 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - data:/var/lib/mysql
+      - groupomania_data:/var/lib/mysql
+      - ./groupomania.sql:/docker-entrypoint-initdb.d/groupomania.sql
 
   phpmyadmin:
-    image: phpmyadmin:5.2.0
+    image: phpmyadmin:latest
     container_name: phpmyadmin
     restart: always
     environment:
@@ -23,4 +24,4 @@ services:
       - 8080:80
 
 volumes:
-  data:
+  groupomania_data:

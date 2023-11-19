@@ -31,6 +31,7 @@ async function fetchUser(req, res) {
 }
 
 // Update a user
+// TODO: not update if the data is the same as the data already present
 async function updateUser(req, res) {
   try {
     const user = await prisma.users.findUnique({
